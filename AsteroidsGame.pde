@@ -1,8 +1,7 @@
 private SpaceShip SS_Wicked;
 private Star[]starField=new Star[250];
 private Laser Lazer;
-private ArrayList <Asteroid> Galactoid=new ArrayList <Asteroid>();
-private boolean game=true;
+
 public void setup()
 {
   size(1500, 1000);
@@ -14,57 +13,38 @@ public void setup()
   for (int i=0; i<starField.length; i++) {
     starField[i]=new Star();
   }
-  for (int i=0; i<10; i++) {
-    Galactoid.add(new Asteroid());
-  }
 }
 public void draw()
 {
-  if (game == true)
+  if (SS_Wicked.getHyperspacing()==false /*&& SS_Wicked.getAccelerating()==false*/)
   {
-    SS_Wicked.move();
-    Lazer.move();
-    SS_Wicked.show();
-    Lazer.show();
-
-    if (SS_Wicked.getHyperspacing()==false)
+    fill(0, 0, 0);
+    rect(0, 0, width, height);
+    fill(255, 255, 255);
+    for (int i=0; i<starField.length; i++) {
+      starField[i].show();
+    }
+  }
+  if (SS_Wicked.getHyperspacing()==true || SS_Wicked.getAccelerating()==true)
+  {
+    if (SS_Wicked.getHyperspacing()==true)
     {
-      fill(0, 0, 0);
+      fill(0, 0, 0, 20);
       rect(0, 0, width, height);
-      fill(255, 255, 255);
       for (int i=0; i<starField.length; i++) {
         starField[i].show();
       }
-    }
-    if (SS_Wicked.getHyperspacing()==true || SS_Wicked.getAccelerating()==true)
-    {
-      if (SS_Wicked.getHyperspacing()==true)
+      SS_Wicked.setHyperspaceCounter(SS_Wicked.getHyperspaceCounter()+1);
+      if (SS_Wicked.getHyperspaceCounter()>6)
       {
-        fill(0, 0, 0, 20);
-        rect(0, 0, width, height);
-        for (int i=0; i<starField.length; i++) {
-          starField[i].show();
-        }
-        SS_Wicked.setHyperspaceCounter(SS_Wicked.getHyperspaceCounter()+1);
-        if (SS_Wicked.getHyperspaceCounter()>6)
-        {
-          SS_Wicked.setHyperspacing(false);
-        }
+        SS_Wicked.setHyperspacing(false);
       }
     }
-  }
-  for (int i=0; i<Galactoid.size (); i++)
-  {
-    Galactoid.get(i).move();
-    Galactoid.get(i).show();
   }
   SS_Wicked.move();
   Lazer.move();
   Lazer.show();
   SS_Wicked.show();
-  if (game == true) {
-    hit();
-  }
   if (SS_Wicked.getAccelerating()==true) {
     SS_Wicked.accelerate(.1);
   }
@@ -80,10 +60,6 @@ public void draw()
 }
 public void keyPressed()
 {
-  if(key == 'r')
-  {
-    game = true;
-  }
   if (key=='h')
   {
     SS_Wicked.setHyperspacing(true);
@@ -126,20 +102,7 @@ public void keyReleased()
     }
   }
 }
-public void hit()
-{
-  for (int i = 0; i < Galactoid.size (); i++)
-  {
-    if (dist((int)(Galactoid.get(i).myCenterX), (int)(Galactoid.get(i).myCenterY), (int)(SS_Wicked.getX()), (int)(SS_Wicked.getY())) <=20)
-    {
-      game = false;
-    }
-    if (dist((int)(Galactoid.get(i).myCenterX), (int)(Galactoid.get(i).myCenterY), (int)(Lazer.getX()), (int)(Lazer.getY()))<=10)
-    {
-      Galactoid.remove(i);
-    }
-  }
-}
+
 class Star
 {
   private double myX, myY;
@@ -177,9 +140,8 @@ class SpaceShip extends Floater
     yCorners[2]=0*sides;
     xCorners[3]=-12*sides; 
     yCorners[3]=8*sides;
-    //    xCorners[4]=-6*sides; 
-    //    yCorners[4]=15*sides;
 
+   
     myCenterX=0; 
     myCenterY=0;
     myDirectionX=0; 
@@ -287,7 +249,7 @@ class SpaceShip extends Floater
     if (myDirectionY<=-10) {
       myDirectionY=-10;
     }
-    //change the x and y coordinates by myDirectionX and myDirectionY
+ 
     myCenterX += myDirectionX;
     myCenterY += myDirectionY;
     //wrap around screen
@@ -322,19 +284,7 @@ class SpaceShip extends Floater
       vertex(xRotatedTranslated, yRotatedTranslated);
     }
     endShape(CLOSE);
-  }
-  public void reset()
-  {
-    myCenterX=width/2;    
-    myCenterY=height/2;
-    myDirectionX=0; 
-    myDirectionY=0;
-    myPointDirection=0;
-    accelerating=false; 
-    braking=false;
-    leftTurn=false;     
-    rightTurn=false;
-    hyperspacing=false;
+
   }
 }
 class Laser
@@ -419,115 +369,7 @@ class Laser
     line((int)myX, (int)myY, (int)(myX+5*Math.cos(dRadians)), (int)(myY+5*Math.sin(dRadians)));
   }
 }
-class Asteroid extends Floater
-{
-  double myRotSpeed;
-  int myDirectionOfRot;
-  Asteroid()
-  {
-    int sides=1;
-    corners=6;
-    xCorners=new int[corners];
-    yCorners=new int[corners];
-    xCorners[0]=10*sides; 
-    yCorners[0]=0*sides;
-    xCorners[1]=4*sides; 
-    yCorners[1]=4*sides;
-    xCorners[2]=-7*sides; 
-    yCorners[2]=12*sides;
-    xCorners[3]=-7*sides; 
-    yCorners[3]=12*sides;
-    xCorners[4]=-9*sides; 
-    yCorners[4]=-9*sides;
-    xCorners[5]=8*sides; 
-    yCorners[5]=-8*sides;
-    myColor=color(90, 90, 90);
-    myDirectionX=Math.random()*2-0.95;
-    myDirectionY=Math.random()*2-0.95;
-    myPointDirection=0;
-    double x=Math.random();
-    if (x<=0.5) {
-      myDirectionOfRot=1;
-    }
-    if (x>0.5) {
-      myDirectionOfRot=-1;
-    }
-    myRotSpeed=Math.random()*10;
-    int i=(int)(Math.random()*5);
-    if (i==1)
-    {
-      myCenterX=Math.random()*20;
-      myCenterY=Math.random()*20;
-    }
-    if (i==2)
-    {
-      myCenterX=Math.random()*20+500;
-      myCenterY=Math.random()*20;
-    }
-    if (i==3)
-    {
-      myCenterX=Math.random()*20;
-      myCenterY=Math.random()*20+500;
-    }
-    if (i==4)
-    {
-      myCenterX=Math.random()*20+1000;
-      myCenterY=Math.random()*20+1000;
-    }
-  }
-  public void setX(int x) {
-    myCenterX=x;
-  }
-  public int getX() {
-    return (int)(myCenterX);
-  }
-  public void setY(int y) {
-    myCenterY=y;
-  }
-  public int getY() {
-    return (int)(myCenterY);
-  }
-  public void setDirectionX(double x) {
-    myDirectionX=x;
-  }
-  public double getDirectionX() {
-    return myDirectionX;
-  }
-  public void setDirectionY(double y) {
-    myDirectionY=y;
-  }
-  public double getDirectionY() {
-    return myDirectionY;
-  }
-  public void setPointDirection(int degrees) {
-    myPointDirection=degrees;
-  }
-  public double getPointDirection() {
-    return myPointDirection;
-  }
-  public void move () //move the floater in the current direction of travel
-  {
-    //change the x and y coordinates by myDirectionX and myDirectionY
-    myCenterX += myDirectionX;
-    myCenterY += myDirectionY;
-    //wrap around screen
-    if (myCenterX >width)
-    {
-      myCenterX = 0;
-    } else if (myCenterX<0)
-    {
-      myCenterX = width;
-    }
-    if (myCenterY >height)
-    {
-      myCenterY = 0;
-    } else if (myCenterY < 0)
-    {
-      myCenterY = height;
-    }
-    rotate(myDirectionOfRot*(int)(Math.random()*5+1));
-  }
-}
+
 abstract class Floater
 {
   protected int corners; //the number of corners, a triangular floater has 3
