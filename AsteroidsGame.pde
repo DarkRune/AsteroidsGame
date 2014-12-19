@@ -1,7 +1,7 @@
 private SpaceShip SS_Wicked;
 private Star[]starField=new Star[250];
 private Laser Lazer;
-
+private Asteroid [] Galactoid;
 public void setup()
 {
   size(1500, 1000);
@@ -13,10 +13,14 @@ public void setup()
   for (int i=0; i<starField.length; i++) {
     starField[i]=new Star();
   }
+  Galactoid = new Asteroid[10];
+  for (int i=0; i<Galactoid.length; i++) {
+    Galactoid[i] = new Asteroid();
+  }
 }
 public void draw()
 {
-  if (SS_Wicked.getHyperspacing()==false /*&& SS_Wicked.getAccelerating()==false*/)
+  if (SS_Wicked.getHyperspacing()==false)
   {
     fill(0, 0, 0);
     rect(0, 0, width, height);
@@ -40,6 +44,11 @@ public void draw()
         SS_Wicked.setHyperspacing(false);
       }
     }
+  }
+  for (int i=0; i<Galactoid.length; i++)
+  {
+    Galactoid[i].move();
+    Galactoid[i].show();
   }
   SS_Wicked.move();
   Lazer.move();
@@ -140,7 +149,6 @@ class SpaceShip extends Floater
     yCorners[2]=0*sides;
     xCorners[3]=-12*sides; 
     yCorners[3]=8*sides;
-
    
     myCenterX=0; 
     myCenterY=0;
@@ -249,10 +257,8 @@ class SpaceShip extends Floater
     if (myDirectionY<=-10) {
       myDirectionY=-10;
     }
- 
     myCenterX += myDirectionX;
     myCenterY += myDirectionY;
-    //wrap around screen
     if (myCenterX >width)
     {
       myCenterX = 0;
@@ -272,7 +278,6 @@ class SpaceShip extends Floater
   {
     fill(myColor);
     stroke(myColor);
-    //convert degrees to radians for sin and cos
     double dRadians = myPointDirection*(Math.PI/180);
     int xRotatedTranslated, yRotatedTranslated;
     beginShape();
@@ -369,7 +374,115 @@ class Laser
     line((int)myX, (int)myY, (int)(myX+5*Math.cos(dRadians)), (int)(myY+5*Math.sin(dRadians)));
   }
 }
-
+class Asteroid extends Floater
+{
+  double myRotSpeed;
+  int myDirectionOfRot;
+  Asteroid()
+  {
+    int sides=1;
+    corners=6;
+    xCorners=new int[corners];
+    yCorners=new int[corners];
+    xCorners[0]=10*sides; 
+    yCorners[0]=0*sides;
+    xCorners[1]=4*sides; 
+    yCorners[1]=4*sides;
+    xCorners[2]=-7*sides; 
+    yCorners[2]=12*sides;
+    xCorners[3]=-7*sides; 
+    yCorners[3]=12*sides;
+    xCorners[4]=-9*sides; 
+    yCorners[4]=-9*sides;
+    xCorners[5]=8*sides; 
+    yCorners[5]=-8*sides;
+    myColor=color(90, 90, 90);
+    myDirectionX=Math.random()*2-0.95;
+    myDirectionY=Math.random()*2-0.95;
+    myPointDirection=0;
+    double x=Math.random();
+    if (x<=0.5) {
+      myDirectionOfRot=1;
+    }
+    if (x>0.5) {
+      myDirectionOfRot=-1;
+    }
+    myRotSpeed=Math.random()*10;
+    int i=(int)(Math.random()*5);
+    if (i==1)
+    {
+      myCenterX=Math.random()*20;
+      myCenterY=Math.random()*20;
+    }
+    if (i==2)
+    {
+      myCenterX=Math.random()*20+500;
+      myCenterY=Math.random()*20;
+    }
+    if (i==3)
+    {
+      myCenterX=Math.random()*20;
+      myCenterY=Math.random()*20+500;
+    }
+    if (i==4)
+    {
+      myCenterX=Math.random()*20+1000;
+      myCenterY=Math.random()*20+1000;
+    }
+  }
+  public void setX(int x) {
+    myCenterX=x;
+  }
+  public int getX() {
+    return (int)(myCenterX);
+  }
+  public void setY(int y) {
+    myCenterY=y;
+  }
+  public int getY() {
+    return (int)(myCenterY);
+  }
+  public void setDirectionX(double x) {
+    myDirectionX=x;
+  }
+  public double getDirectionX() {
+    return myDirectionX;
+  }
+  public void setDirectionY(double y) {
+    myDirectionY=y;
+  }
+  public double getDirectionY() {
+    return myDirectionY;
+  }
+  public void setPointDirection(int degrees) {
+    myPointDirection=degrees;
+  }
+  public double getPointDirection() {
+    return myPointDirection;
+  }
+  public void move () //move the floater in the current direction of travel
+  {
+    //change the x and y coordinates by myDirectionX and myDirectionY
+    myCenterX += myDirectionX;
+    myCenterY += myDirectionY;
+    //wrap around screen
+    if (myCenterX >width)
+    {
+      myCenterX = 0;
+    } else if (myCenterX<0)
+    {
+      myCenterX = width;
+    }
+    if (myCenterY >height)
+    {
+      myCenterY = 0;
+    } else if (myCenterY < 0)
+    {
+      myCenterY = height;
+    }
+    rotate(myDirectionOfRot*(int)(Math.random()*5+1));
+  }
+}
 abstract class Floater
 {
   protected int corners; //the number of corners, a triangular floater has 3
@@ -400,15 +513,12 @@ abstract class Floater
   }
   public void rotate (int nDegreesOfRotation)
   {
-    //rotates the floater by a given number of degrees
     myPointDirection+=nDegreesOfRotation;
   }
   public void move () //move the floater in the current direction of travel
   {
-    //change the x and y coordinates by myDirectionX and myDirectionY
     myCenterX += myDirectionX;
     myCenterY += myDirectionY;
-    //wrap around screen
     if (myCenterX >width)
     {
       myCenterX = 0;
@@ -428,13 +538,11 @@ abstract class Floater
   {
     fill(myColor);
     stroke(myColor);
-    //convert degrees to radians for sin and cos
     double dRadians = myPointDirection*(Math.PI/180);
     int xRotatedTranslated, yRotatedTranslated;
     beginShape();
     for (int nI = 0; nI < corners; nI++)
     {
-      //rotate and translate the coordinates of the floater using current direction
       xRotatedTranslated = (int)((xCorners[nI]* Math.cos(dRadians)) - (yCorners[nI] * Math.sin(dRadians))+myCenterX);
       yRotatedTranslated = (int)((xCorners[nI]* Math.sin(dRadians)) + (yCorners[nI] * Math.cos(dRadians))+myCenterY);
       vertex(xRotatedTranslated, yRotatedTranslated);
